@@ -5,8 +5,9 @@ Desarrollar una API REST para gestión de pedidos implementando arquitectura lim
 
 ## Requisitos Técnicos
 
-### 1. Arquitectura
-Se evaluará la arquitectura implementada
+### 1. Arquitectura (Clean architecture)
+
+![CleanArchitecture.jpg](CleanArchitecture.jpg)
 
 ### 2. Funcionalidades (Core Features)
 
@@ -131,6 +132,7 @@ API → RabbitMQ Queue → Consumer → MailHog SMTP → Email capturado
 - RabbitMQ (Host, Port, Username, Password)
 - Email (SmtpHost, SmtpPort, FromEmail, FromName)
 - Serilog configuration
+- Utilizar un Vault (opcional)
 
 **Otros:**
 - Inyección de dependencias completa
