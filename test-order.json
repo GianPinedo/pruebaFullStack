@@ -1,0 +1,14 @@
+{
+  "customerName": "Juan Pérez",
+  "customerEmail": "juan.perez@ejemplo.com",
+  "items": [
+    {
+      "productId": "89bda7c4-a939-4458-ba60-4dd506315bd7",
+      "quantity": 2
+    },
+    {
+      "productId": "c2f6b56a-3b0e-458f-94a6-8444252e6e1e",
+      "quantity": 1
+    }
+  ]
+}

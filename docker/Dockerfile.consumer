@@ -1,0 +1,43 @@
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy csproj files
+COPY ["src/OrderManagement.Consumer/OrderManagement.Consumer.csproj", "src/OrderManagement.Consumer/"]
+COPY ["src/OrderManagement.Application/OrderManagement.Application.csproj", "src/OrderManagement.Application/"]
+COPY ["src/OrderManagement.Domain/OrderManagement.Domain.csproj", "src/OrderManagement.Domain/"]
+COPY ["src/OrderManagement.Infrastructure/OrderManagement.Infrastructure.csproj", "src/OrderManagement.Infrastructure/"]
+
+# Restore dependencies
+RUN dotnet restore "src/OrderManagement.Consumer/OrderManagement.Consumer.csproj"
+
+# Copy everything
+COPY . .
+
+# Build the application
+WORKDIR "/src/src/OrderManagement.Consumer"
+RUN dotnet build "OrderManagement.Consumer.csproj" -c Release -o /app/build
+
+# Publish stage
+FROM build AS publish
+RUN dotnet publish "OrderManagement.Consumer.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+
+# Install wait utility for health checks
+RUN apt-get update && apt-get install -y wget && \
+    wget -O /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.1/wait && \
+    chmod +x /wait
+
+# Copy email templates
+COPY ["docs/email_templates/", "docs/email_templates/"]
+
+COPY --from=publish /app/publish .
+
+# Environment variables
+ENV DOTNET_ENVIRONMENT=Production
+
+# Entry point
+ENTRYPOINT ["/wait", "dotnet", "OrderManagement.Consumer.dll"]

@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16
+    container_name: orders-postgres
+    environment:
+      POSTGRES_USER: josh
+      POSTGRES_PASSWORD: 
+      POSTGRES_DB: pedidos_bd
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U josh -d pedidos_bd"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - orders-network
+
+  # RabbitMQ Message Broker
+  rabbit:
+    image: rabbitmq:3-management
+    container_name: orders-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      - orders-network
+
+  # MailHog SMTP Server
+  mailhog:
+    image: mailhog/mailhog
+    container_name: orders-mailhog
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "1025"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - orders-network
+
+  # Order Management API
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: orders-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=pedidos_bd;Username=josh;Password=;Include Error Detail=true
+      - RabbitMQ__Host=rabbit
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+      - Email__SmtpHost=mailhog
+      - Email__SmtpPort=1025
+      - Email__FromEmail=no-reply@orders.local
+      - Email__FromName=Order Management System
+      - WAIT_HOSTS=db:5432,rabbit:5672,mailhog:1025
+      - WAIT_HOSTS_TIMEOUT=300
+      - WAIT_SLEEP_INTERVAL=5
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+    ports:
+      - "5000:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+      mailhog:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - orders-network
+
+  # Order Consumer Worker
+  consumer:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.consumer
+    container_name: orders-consumer
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=pedidos_bd;Username=josh;Password=;Include Error Detail=true
+      - RabbitMQ__Host=rabbit
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+      - Email__SmtpHost=mailhog
+      - Email__SmtpPort=1025
+      - Email__FromEmail=no-reply@orders.local
+      - Email__FromName=Order Management System
+      - WAIT_HOSTS=db:5432,rabbit:5672,mailhog:1025,api:8080
+      - WAIT_HOSTS_TIMEOUT=300
+      - WAIT_SLEEP_INTERVAL=5
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - orders-network
+
+volumes:
+  postgres_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+
+networks:
+  orders-network:
+    driver: bridge

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Pedido</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4CAF50;
+        }
+        .header h1 {
+            color: #4CAF50;
+            margin: 0;
+            font-size: 28px;
+        }
+        .header .subtitle {
+            color: #666;
+            margin: 5px 0 0 0;
+            font-size: 16px;
+        }
+        .order-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        .order-info h2 {
+            color: #333;
+            margin-top: 0;
+            font-size: 20px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .info-value {
+            color: #333;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .items-table th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .items-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .items-table tr:hover {
+            background-color: #e8f5e8;
+        }
+        .price {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .total {
+            background-color: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .total-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 5px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status.pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .footer .contact-info {
+            margin: 15px 0;
+        }
+        .footer .social-links {
+            margin: 15px 0;
+        }
+        .footer .social-links a {
+            color: #4CAF50;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .next-steps {
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+        .next-steps h3 {
+            color: #1976D2;
+            margin-top: 0;
+        }
+        .next-steps ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .next-steps li {
+            margin: 8px 0;
+            color: #333;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px;
+            }
+            .items-table {
+                font-size: 14px;
+            }
+            .items-table th,
+            .items-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>¡Pedido Confirmado!</h1>
+            <p class="subtitle">Gracias por tu compra en Order Management System</p>
+        </div>
+
+        <!-- Información del Pedido -->
+        <div class="order-info">
+            <h2>📋 Información del Pedido</h2>
+            <div class="info-row">
+                <span class="info-label">Número de Pedido:</span>
+                <span class="info-value">{OrderId}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Fecha del Pedido:</span>
+                <span class="info-value">{OrderDate}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email del Cliente:</span>
+                <span class="info-value">{CustomerEmail}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Estado:</span>
+                <span class="info-value">
+                    <span class="status pending">{Status}</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Detalles de los Productos -->
+        <h2>🛍️ Productos Pedidos</h2>
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {OrderItems}
+                <!-- Ejemplo de item: -->
+                <!-- <tr>
+                    <td>Laptop Gaming MSI</td>
+                    <td>2</td>
+                    <td class="price">$1,299.99</td>
+                    <td class="price">$2,599.98</td>
+                </tr> -->
+            </tbody>
+        </table>
+
+        <!-- Total -->
+        <div class="total">
+            <div style="font-size: 18px; color: #666;">Total del Pedido</div>
+            <div class="total-amount">${TotalAmount}</div>
+        </div>
+
+        <!-- Próximos Pasos -->
+        <div class="next-steps">
+            <h3>📋 Próximos Pasos</h3>
+            <ul>
+                <li><strong>Procesamiento:</strong> Tu pedido está siendo procesado y verificado.</li>
+                <li><strong>Preparación:</strong> Una vez confirmado, prepararemos tus productos para envío.</li>
+                <li><strong>Envío:</strong> Recibirás un email con el número de seguimiento cuando tu pedido sea enviado.</li>
+                <li><strong>Entrega:</strong> El tiempo estimado de entrega es de 3-5 días hábiles.</li>
+            </ul>
+        </div>
+
+        <!-- Información Adicional -->
+        <div style="background-color: #fff3e0; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #FF9800;">
+            <h3 style="color: #F57C00; margin-top: 0;">ℹ️ Información Importante</h3>
+            <p style="margin: 0; color: #333;">
+                Si necesitas cancelar tu pedido o tienes alguna pregunta, puedes contactarnos dentro de las próximas 2 horas. 
+                Después de este tiempo, el pedido entrará en procesamiento y no podrá ser modificado.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="contact-info">
+                <strong>¿Necesitas ayuda?</strong><br>
+                📧 Email: orders@company.com<br>
+                📞 Teléfono: +1 (555) 123-4567<br>
+                🕒 Horario: Lunes a Viernes, 9:00 AM - 6:00 PM
+            </div>
+            
+            <div class="social-links">
+                <a href="#">Facebook</a> |
+                <a href="#">Twitter</a> |
+                <a href="#">Instagram</a> |
+                <a href="#">LinkedIn</a>
+            </div>
+            
+            <p style="margin: 20px 0 0 0; font-size: 12px; color: #999;">
+                © 2024 Order Management System. Todos los derechos reservados.<br>
+                Este es un email automático, por favor no respondas a esta dirección.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
